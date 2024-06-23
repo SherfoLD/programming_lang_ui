@@ -35,7 +35,9 @@ function highlightText() {
     let variablesLog = ""
     scope.variables.forEach((v: any, k: any) => {
       console.log(k)
-      variablesLog += `${k} = ${v.value}\n`
+      const octalNumber = toOctal(parseFloat(v.value));
+      console.log(octalNumber);
+      variablesLog += `${k} = ${octalNumber}\n`
     })
     output.value = variablesLog
   } catch (e) {
@@ -82,6 +84,28 @@ onMounted(() => {
   if (!srcRef.value) return
   highlightInner.value = srcRef.value.value
 })
+
+function toOctal(num) {
+  const integerPart = parseInt(num);
+  const fractionalPart = num - integerPart;
+
+  const octalInteger = integerPart.toString(8);
+
+  let octalFraction = '';
+  let fraction = fractionalPart;
+  let limit = 0;  // Prevent infinite loop in case of non-terminating conversions
+
+  // Convert the fractional part
+  while (fraction > 0 && limit < 10) {
+    fraction *= 8;
+    const digit = parseInt(fraction);
+    octalFraction += digit.toString();
+    fraction -= digit;
+    limit++;
+  }
+
+  return octalFraction ? `${octalInteger}.${octalFraction}` : octalInteger;
+}
 </script>
 
 <template>
