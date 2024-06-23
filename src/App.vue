@@ -33,7 +33,7 @@ function highlightText() {
     const scope = new Scope()
     evaluate(ast, scope)
     let variablesLog = ""
-    scope.variables.forEach((v: any,k: any) => {
+    scope.variables.forEach((v: any, k: any) => {
       console.log(k)
       variablesLog += `${k} = ${v.value}\n`
     })
@@ -56,8 +56,8 @@ function highlightText() {
     }
     const originalText = srcRef.value.value;
 
-    const beforeHighlight = originalText.substring(0, start-1);
-    const highlightedText = originalText.substring(start-1, end);
+    const beforeHighlight = originalText.substring(0, start - 1);
+    const highlightedText = originalText.substring(start - 1, end);
     const afterHighlight = originalText.substring(end);
 
     highlightInner.value = beforeHighlight + '<mark>' + highlightedText + '</mark>' + afterHighlight;
@@ -82,39 +82,13 @@ onMounted(() => {
   if (!srcRef.value) return
   highlightInner.value = srcRef.value.value
 })
-
 </script>
 
 <template>
-  <div style="display: flex; flex-direction: row; padding: 20px; border-radius: 5px; box-shadow: rgba(0, 0, 0, 0.3) 0 1px 3px;">
+  <div style="display: flex; flex-direction: column; width: 100%; height: 100%; padding: 40px">
     <div>
-      <h1>Исходный код</h1>
-      <div class="srcContainer">
-        <div class="backdrop" ref="backdropRef">
-          <div class="highlights" ref="highlightRef" v-html="highlightInner"></div>
-        </div>
-        <textarea @input="clearMarks" @scroll="updateScroll" ref="srcRef" autocomplete="off" autocapitalize="off" spellcheck="false">Начало
-Первое ПЕРЕМ1, ПЕРЕМ2, ПЕРЕМ3
-Второе 123 741 1 32
-Первое ПЕРЕМ4
-
-34, 324 Конец слагаемого
-
-ПЕРЕМ1 = 400 + 200
-0: ПЕРЕМ2 = ПЕРЕМ1 * 2
-ПЕРЕМ3 = Косинус Синус ПЕРЕМ2 + !0
-ПЕРЕМ4 = !0 && 1 || !ПЕРЕМ3
-1: ПЕРЕМ5 = ПЕРЕМ1 + ПЕРЕМ2 * ПЕРЕМ3 + ПЕРЕМ4
-
-Конец</textarea>
-      </div>
-      <button class="pure-material-button-contained" @click="highlightText" style="margin-top: 10px;">Выполнить</button>
-      <div class="output"><pre>Вывод:<br>{{output}}</pre></div>
-    </div>
-    <div style="margin-left: 30px">
-      <h1>БНФ языка</h1>
-      <div class="srcContainer">
-        <textarea disabled>Язык = "Начало" Множество...Множество Слагаемое Оператор...Оператор "Конец"
+      <h1 style="text-align: center">БНФ языка</h1>
+      <textarea rows="17" cols="150" disabled style="font-weight: 500;">Язык = "Начало" Множество...Множество Слагаемое Оператор...Оператор "Конец"
 Множество = "Первое" Переменная  ","...Переменная ! "Второе" Целое...Целое
 Слагаемое = Целое ","...Целое "Конец слагаемого"
 Оператор = </Метка ":"/> Переменная "=" Пр.ч.
@@ -130,31 +104,53 @@ onMounted(() => {
 Целое = Ц...Ц
 Сим=Б!Ц
 Б="А"!"Б"!..."Я"!"а"!"б"!..."я"
-Ц="0"!"1"!..."7"
-        </textarea>
+Ц="0"!"1"!..."7"</textarea>
+    </div>
+    <div style="margin-top: 20px">
+      <h1 style="text-align: center">Код программы</h1>
+      <div class="backdrop" ref="backdropRef">
+        <div class="highlights" ref="highlightRef" v-html="highlightInner"></div>
       </div>
+      <textarea rows="18" cols="150" @input="clearMarks" @scroll="updateScroll" ref="srcRef" autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false">Начало
+Первое ПЕРЕМ1, ПЕРЕМ2, ПЕРЕМ3
+Второе 123 741 1 32
+Первое ПЕРЕМ4
+
+34, 324 Конец слагаемого
+
+ПЕРЕМ1 = 400 + 200
+0: ПЕРЕМ2 = ПЕРЕМ1 * 2
+ПЕРЕМ3 = Косинус Синус ПЕРЕМ2 + !0
+ПЕРЕМ4 = !0 && 1 || !ПЕРЕМ3
+1: ПЕРЕМ5 = ПЕРЕМ1 + ПЕРЕМ2 * ПЕРЕМ3 + ПЕРЕМ4
+
+Конец</textarea>
+
+    </div>
+    <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+      <button @click="highlightText" style="padding: 10px; width: 150px; font: 18px 'Times New Roman'">
+        Выполнить
+      </button>
+    </div>
+    <div class="output">
+      <pre>Вывод программы:<br>{{ output }}</pre>
     </div>
   </div>
 </template>
 
 <style>
-
-.backdrop, textarea, .srcContainer {
-  width: 500px;
-  height: 400px;
-}
-
 .highlights, textarea {
   padding: 10px;
-  font: 14px/20px 'Open Sans', sans-serif;
+  font: 14px/20px "Helvetica Neue";
   letter-spacing: 1px;
 }
 
 .backdrop {
   position: absolute;
   z-index: 1;
-  border: 2px solid #685972;
-  background-color: #fff;
+  background-color: transparent;
   overflow: auto;
   pointer-events: none;
   transition: transform 1s;
@@ -167,17 +163,7 @@ onMounted(() => {
 }
 
 textarea {
-  display: block;
-  position: absolute;
-  z-index: 2;
-  margin: 0;
-  border: 2px solid #74637f;
-  border-radius: 0;
-  color: #444;
   background-color: transparent;
-  overflow: auto;
-  resize: none;
-  transition: transform 1s;
 }
 
 mark {
