@@ -308,7 +308,7 @@ export class Parser {
             case TokenType.Identifier:
                 return {kind: "Identifier", symbol: currentToken} as Identifier
             case TokenType.Integer:
-                return {kind: "IntegerLiteral", value: +currentToken.value} as IntegerLiteral
+                return {kind: "IntegerLiteral", value: +parseInt(currentToken.value, 8)} as IntegerLiteral
         }
         throw new LangCompileError("В выражении должны быть только Переменная или Целое число", currentToken)
     }
