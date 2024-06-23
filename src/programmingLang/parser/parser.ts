@@ -75,6 +75,7 @@ export class Parser {
             kind: "Program",
             body: []
         }
+        this.skipNewLines()
         this.expect("Программа должна начинаться со слова 'Начало'", TokenType.Start)
         program.body.push(this.parseSets())
         this.skipNewLines()
