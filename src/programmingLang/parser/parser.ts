@@ -130,7 +130,7 @@ export class Parser {
                 while (!this.typeMatches(0, TokenType.NewLine)) {
                     const commaToken = this.expect(`Переменные должны быть разделены запятой`, TokenType.Comma)
 
-                    const identifierToken = this.expect(`После запятой должная стоять переменная`, TokenType.Identifier)
+                    const identifierToken = this.expect(`После запятой в 'Первое' должная стоять переменная`, TokenType.Identifier)
                     identifiers.push({kind: "Identifier", symbol: identifierToken} as Identifier)
                 }
 
@@ -163,10 +163,13 @@ export class Parser {
         const firstToken = this.expect(`Слагаемое должно состоять из целых чисел, разделенных запятой`, TokenType.Integer)
         numbers.push({kind: "IntegerLiteral", value: +firstToken.value} as IntegerLiteral)
 
-        while (!this.typeMatches(0, TokenType.End)) {
+        while (true) {
+            if (!this.typeMatches(0, TokenType.Comma, TokenType.Integer))
+                break
+
             const commaToken = this.expect(`Целые должны быть разделены запятой`, TokenType.Comma)
 
-            const integerToken = this.expect(`После 'Второе' должны стоять только целые`, TokenType.Integer)
+            const integerToken = this.expect(`Слагаемое должно состоять из целых чисел, разделенных запятой`, TokenType.Integer)
             numbers.push({kind: "IntegerLiteral", value: +integerToken.value} as IntegerLiteral)
         }
 

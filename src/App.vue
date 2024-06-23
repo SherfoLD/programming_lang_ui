@@ -35,9 +35,7 @@ function highlightText() {
     let variablesLog = ""
     scope.variables.forEach((v: any, k: any) => {
       console.log(k)
-      const octalNumber = toOctal(parseFloat(v.value));
-      console.log(octalNumber);
-      variablesLog += `${k} = ${octalNumber}\n`
+      variablesLog += `${k} = ${v.value}\n`
     })
     output.value = variablesLog
   } catch (e) {
@@ -84,28 +82,6 @@ onMounted(() => {
   if (!srcRef.value) return
   highlightInner.value = srcRef.value.value
 })
-
-function toOctal(num) {
-  const integerPart = parseInt(num);
-  const fractionalPart = num - integerPart;
-
-  const octalInteger = integerPart.toString(8);
-
-  let octalFraction = '';
-  let fraction = fractionalPart;
-  let limit = 0;  // Prevent infinite loop in case of non-terminating conversions
-
-  // Convert the fractional part
-  while (fraction > 0 && limit < 10) {
-    fraction *= 8;
-    const digit = parseInt(fraction);
-    octalFraction += digit.toString();
-    fraction -= digit;
-    limit++;
-  }
-
-  return octalFraction ? `${octalInteger}.${octalFraction}` : octalInteger;
-}
 </script>
 
 <template>
@@ -144,9 +120,9 @@ function toOctal(num) {
 
 34, 324 Конец слагаемого
 
-ПЕРЕМ1 = 400 + 200
-0: ПЕРЕМ2 = ПЕРЕМ1 * 2
-ПЕРЕМ3 = Косинус Синус ПЕРЕМ2 + !0
+ПЕРЕМ1 = 123 + 100
+0: ПЕРЕМ2 = 4 * ПЕРЕМ1
+ПЕРЕМ3 = Косинус Синус ПЕРЕМ2 + ПЕРЕМ1
 ПЕРЕМ4 = !0 && 1 || !ПЕРЕМ3
 1: ПЕРЕМ5 = ПЕРЕМ1 + ПЕРЕМ2 * ПЕРЕМ3 + ПЕРЕМ4
 
