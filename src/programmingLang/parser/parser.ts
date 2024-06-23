@@ -189,7 +189,7 @@ export class Parser {
         let tag = identifierOrTag;
         if (identifierOrTag.type === TokenType.Integer) {
             const semicolon = this.expect("После метки должно идти двоеточие", TokenType.Colon)
-            identifier = this.expect("Операция должна начинаться с объявления переменной", TokenType.Identifier)
+            identifier = this.expect("После метки должно идти объявление переменной", TokenType.Identifier)
         }
 
         this.expect("После объявление переменной должен стоять знак '='", TokenType.Equals)

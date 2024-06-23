@@ -66,9 +66,6 @@ export class LanguageSpecifics {
     }
 
     static isIdentifier(str: string): boolean {
-        if (str.length <= 1)
-            return false
-
         if (!this.isAlphabetic(str[0] || ""))
             return false
 
