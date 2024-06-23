@@ -27,7 +27,7 @@ function highlightText() {
   try {
     const source = new SourceCode(srcRef.value.value)
     const tokens = tokenize(source)
-    console.log(tokens[0])
+    console.warn(tokens)
     const ast = new Parser(tokens).parse()
 
     const scope = new Scope()
@@ -93,16 +93,18 @@ onMounted(() => {
         <div class="backdrop" ref="backdropRef">
           <div class="highlights" ref="highlightRef" v-html="highlightInner"></div>
         </div>
-        <textarea @input="clearMarks" @scroll="updateScroll" ref="srcRef" autocomplete="off" autocapitalize="off" spellcheck="false">Программа
-Выполнить:123.321 12.123 Первое
-Сохранить:123.1 Второе
-Выполнить:123.1 1.32 12.2 Второе
+        <textarea @input="clearMarks" @scroll="updateScroll" ref="srcRef" autocomplete="off" autocapitalize="off" spellcheck="false">Начало
+Первое ПЕРЕМ1, ПЕРЕМ2, ПЕРЕМ3
+Второе 123 741 1 32
+Первое ПЕРЕМ4
+
+34, 324 Конец слагаемого
 
 ПЕРЕМ1 = 400 + 200
-ПЕРЕМ2 = ПЕРЕМ1 * 2
+0: ПЕРЕМ2 = ПЕРЕМ1 * 2
 ПЕРЕМ3 = Косинус Синус ПЕРЕМ2 + !0
 ПЕРЕМ4 = !0 && 1 || !ПЕРЕМ3
-ПЕРЕМ5 = ПЕРЕМ1 + ПЕРЕМ2 * ПЕРЕМ3 + ПЕРЕМ4
+1: ПЕРЕМ5 = ПЕРЕМ1 + ПЕРЕМ2 * ПЕРЕМ3 + ПЕРЕМ4
 
 Конец</textarea>
       </div>
@@ -112,18 +114,20 @@ onMounted(() => {
     <div style="margin-left: 30px">
       <h1>БНФ языка</h1>
       <div class="srcContainer">
-        <textarea disabled>Язык = "Программа" Множества Опер...Опер "Конец"
-Множества = Множество...Множество
-Множество = ["Выполнить" ! "Сохранить"] ":" Вещ...Вещ ["Первое" ! "Второе"]
-Опер = Перем "=" Пр.ч.
+        <textarea disabled>Язык = "Начало" Множество...Множество Слагаемое Оператор...Оператор "Конец"
+Множество = "Первое" Переменная  ","...Переменная ! "Второе" Целое...Целое
+Слагаемое = Целое ","...Целое "Конец слагаемого"
+Оператор = </Метка ":"/> Переменная "=" Пр.ч.
 Пр.ч = </"-"/> Блок ["+" ! "-"]...Блок
 Блок = Блок2 ["*" ! "/"]...Блок2
 Блок2 = Блок3 ["&&" ! "||"]... Блок3
 Блок3 = </"!"/> Блок4
 Блок4 = </Функ...Функ/> Блок5
-Блок5 = Цел ! Перем
-Перем = Б</Сим...Сим/>
+Блок5 = Целое ! Переменная
 Функ = "Синус" ! "Косинус" ! "Тангенс" ! "Котангенс"
+Переменная = Б</Сим...Сим/>
+Метка = Целое
+Целое = Ц...Ц
 Сим=Б!Ц
 Б="А"!"Б"!..."Я"!"а"!"б"!..."я"
 Ц="0"!"1"!..."7"

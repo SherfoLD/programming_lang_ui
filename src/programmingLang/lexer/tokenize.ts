@@ -48,6 +48,14 @@ export function tokenize(sourceCode: SourceCode): Token[] {
                 from: sourceCode.currentSymbol,
                 to: sourceCode.currentSymbol
             })
+        } else if (sourceCode.peek() === ",") {
+            tokens.push({
+                type: TokenType.Comma,
+                value: sourceCode.consume(),
+                isSpaceBefore,
+                from: sourceCode.currentSymbol,
+                to: sourceCode.currentSymbol
+            })
         } else if (sourceCode.isNextAdditiveOperator()) {
             tokens.push({
                 type: TokenType.AdditiveOperators,

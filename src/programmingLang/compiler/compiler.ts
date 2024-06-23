@@ -31,8 +31,8 @@ export function evaluate(astNode: Statement, scope: Scope = new Scope()): Runtim
             return makeNull()
         case "SetSingle":
             return makeNull()
-        case "FloatLiteral":
-            return  makeNull()
+        case "Summand":
+            return makeNull()
         default:
             throw Error("Неизвестное выражение")
     }

@@ -14,12 +14,11 @@ export class LanguageSpecifics {
     static multiplicatives = ["*", "/"]
 
     static KEYWORDS: Record<string, TokenType> = {
-        "Программа": TokenType.Start,
+        "Начало": TokenType.Start,
         "Конец": TokenType.End,
-        "Выполнить": TokenType.Execute,
-        "Сохранить": TokenType.Save,
         "Первое": TokenType.First,
         "Второе": TokenType.Second,
+        "слагаемого": TokenType.EndOfSummand,
         "Синус": TokenType.Function,
         "Косинус": TokenType.Function,
         "Тангенс": TokenType.Function,

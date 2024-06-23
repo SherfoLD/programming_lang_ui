@@ -2,7 +2,6 @@ import {type Token, TokenType} from '../types/tokens'
 import type {
     BinaryExpression,
     Expression,
-    FloatLiteral,
     FunctionExpression,
     Identifier,
     IntegerLiteral,
@@ -10,6 +9,7 @@ import type {
     Program,
     Sets,
     SetSingle,
+    Summand,
     UnaryExpression
 } from '../types/astNodes.js'
 import {LangCompileError} from "../types/languageError";
@@ -75,11 +75,16 @@ export class Parser {
             kind: "Program",
             body: []
         }
-
-        this.expect("Программа должна начинаться со слова 'Программа'", TokenType.Start)
+        this.expect("Программа должна начинаться со слова 'Начало'", TokenType.Start)
         program.body.push(this.parseSets())
         this.skipNewLines()
-        if (this.peek().type != TokenType.Identifier) {
+        if (this.peek().type != TokenType.Integer) {
+            throw new LangCompileError("В программе должно быть слагаемое", this.peek())
+        }
+        program.body.push(this.parseSummand())
+        this.skipNewLines()
+        console.log(this.peek().type)
+        if (this.peek().type != TokenType.Integer && this.peek().type != TokenType.Identifier) {
             throw new LangCompileError("В программе должна быть хотя бы одна операция", this.peek())
         }
         do {
@@ -101,70 +106,88 @@ export class Parser {
         }
         this.skipNewLines()
         console.log(this.peek())
-        if (this.peek().type != TokenType.Execute && this.peek().type != TokenType.Save) {
+        if (this.peek().type != TokenType.First && this.peek().type != TokenType.Second) {
             throw new LangCompileError("В программе должно быть хотя бы одно множество", this.peek())
         }
         do {
             this.expectNewStatement("Перед началом нового множества должна идти новая строка")
             sets.body.push(this.parseSet())
-        } while (this.typeMatchesStatement(0, TokenType.Execute, TokenType.Save))
+        } while (this.typeMatchesStatement(0, TokenType.First, TokenType.Second))
 
         return sets
     }
 
     parseSet(): SetSingle {
-        const action = this.expect("Множество должно начинаться со слов 'Выполнить' или 'Сохранить'", TokenType.Execute, TokenType.Save)
-        this.expect("После 'Выполнить' или 'Сохранить' должно стоять ':' (двоеточие)", TokenType.Colon)
-        const numbers: FloatLiteral[] = []
-        do {
-            numbers.push(this.parseFloat())
-        } while (this.typeMatches(1, TokenType.Dot))
+        const keyword = this.expect("Множество должно начинаться с 'Первое' или 'Второе'", TokenType.First, TokenType.Second);
 
-        if (this.peek().type === TokenType.Integer) {
-            throw new LangCompileError("Неверный формат дробного числа, ожидалось ЦЕЛОЕ.ЦЕЛОЕ", this.peek())
-        } else if (!this.typeMatches(0, TokenType.First, TokenType.Second)) {
-            if (this.peek().type === TokenType.NewLine) {
-                throw new LangCompileError("Множество должно заканчиваться на 'Первое' или 'Второе'", this.peek())
-            } else {
-                throw new LangCompileError(`Неизвестен '${this.peek().value}' в контексте множеств`, this.peek())
-            }
-        }
+        switch (keyword.type) {
+            case TokenType.First:
+                let identifiers: Identifier[] = []
 
-        const additional = this.expect("Множество должно заканчиваться на 'Первое' или 'Второе'", TokenType.First, TokenType.Second)
+                const firstToken = this.expect(`После 'Первое' должны стоять только переменные, разделенные запятой`, TokenType.Identifier)
+                identifiers.push({kind: "Identifier", symbol: firstToken} as Identifier)
 
-        if (!additional.isSpaceBefore) throw new LangCompileError("Перед 'Первое' или 'Второе' должен быть разделитель", additional)
+                while (!this.typeMatches(0, TokenType.NewLine)) {
+                    const commaToken = this.expect(`Переменные должны быть разделены запятой`, TokenType.Comma)
 
-        if (this.peek().type !== TokenType.NewLine) {
-            throw new LangCompileError("После 'Первое' или 'Второе' не может быть других выражений", this.peek())
-        }
+                    const identifierToken = this.expect(`После запятой должная стоять переменная`, TokenType.Identifier)
+                    identifiers.push({kind: "Identifier", symbol: identifierToken} as Identifier)
+                }
 
-        return {
-            kind: "SetSingle",
-            action: action,
-            body: numbers,
-            additional: additional
+                this.expect("Множество должно заканчиваться на новую строку", TokenType.NewLine);
+
+                return {
+                    kind: "SetSingle",
+                    body: identifiers
+                }
+
+            case TokenType.Second:
+                let numbers: IntegerLiteral[] = []
+                do {
+                    const integerToken = this.expect(`После 'Второе' должны стоять только целые`, TokenType.Integer)
+                    numbers.push({kind: "IntegerLiteral", value: +integerToken.value} as IntegerLiteral)
+                } while (!this.typeMatches(0, TokenType.NewLine))
+
+                this.expect("Множество должно заканчиваться на новую строку", TokenType.NewLine);
+
+                return {
+                    kind: "SetSingle",
+                    body: numbers
+                }
         }
     }
 
-    parseFloat(): FloatLiteral {
-        let numAsString: string = ""
-        numAsString += this.expect("Вещественное число должно начинаться с целого числа", TokenType.Integer).value
-        numAsString += this.expect("Вещественное число долно иметь '.' (точку) как разделитель", TokenType.Dot).value
-        if (this.lastConsumedToken?.isSpaceBefore) {
-            throw new LangCompileError("Между точкой и целым не может быть пробела в вещественных числах", this.lastConsumedToken!)
+    parseSummand(): Summand {
+        let numbers: IntegerLiteral[] = []
+
+        const firstToken = this.expect(`Слагаемое должно состоять из целых чисел, разделенных запятой`, TokenType.Integer)
+        numbers.push({kind: "IntegerLiteral", value: +firstToken.value} as IntegerLiteral)
+
+        while (!this.typeMatches(0, TokenType.End)) {
+            const commaToken = this.expect(`Целые должны быть разделены запятой`, TokenType.Comma)
+
+            const integerToken = this.expect(`После 'Второе' должны стоять только целые`, TokenType.Integer)
+            numbers.push({kind: "IntegerLiteral", value: +integerToken.value} as IntegerLiteral)
         }
-        numAsString += this.expect("Вещественное число долно заканчиваться целым числом", TokenType.Integer).value
-        if (this.lastConsumedToken?.isSpaceBefore) {
-            throw new LangCompileError("Между точкой и целым не может быть пробела в вещественных числах", this.lastConsumedToken!)
-        }
+
+        this.expect("Слагаемое должно заканчиваться на 'Конец слагаемого'", TokenType.End);
+        this.expect("Слагаемое должно заканчиваться на 'Конец слагаемого'", TokenType.EndOfSummand);
+
         return {
-            kind: "FloatLiteral",
-            value: +numAsString
+            kind: "Summand",
+            body: numbers
         }
     }
 
     parseOperator(): Operation {
-        const identifier = this.expect("Операция должна начинаться с объявления переменной", TokenType.Identifier)
+        const identifierOrTag = this.expect("Операция должна начинаться с объявления переменной или с метки", TokenType.Identifier, TokenType.Integer)
+        let identifier = identifierOrTag;
+        let tag = identifierOrTag;
+        if (identifierOrTag.type === TokenType.Integer) {
+            const semicolon = this.expect("После метки должно идти двоеточие", TokenType.Colon)
+            identifier = this.expect("Операция должна начинаться с объявления переменной", TokenType.Identifier)
+        }
+
         this.expect("После объявление переменной должен стоять знак '='", TokenType.Equals)
         const rhs = this.parseAddition()
         if (!this.typeMatches(0, TokenType.NewLine)) {
@@ -173,6 +196,7 @@ export class Parser {
         }
         return {
             kind: "Operation",
+            tag: tag,
             identifier: identifier,
             rhs: rhs
         }

@@ -13,14 +13,14 @@ export enum TokenType {
     AdditiveOperators, // [+,-]
     MultiplicativeOperators, // [*,/]
     Dot,
+    Comma,
     //// MULTICHAR TOKENS
     // RESERVED
     Start,
     End,
-    Execute,
-    Save,
     First,
     Second,
+    EndOfSummand,
     Function,
     LogicOperators, // WHAT IS LOGIC? [&&, ||, И, ИЛИ] SOLVE FOR EQUALS
     // FREE

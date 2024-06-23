@@ -5,9 +5,9 @@ export type NodeType =
     | "BinaryExpression"
     | "Identifier"
     | "IntegerLiteral"
-    | "FloatLiteral"
     | "Sets"
     | "SetSingle"
+    | "Summand"
     | "Operation"
     | "FunctionExpression"
     | "UnaryExpression"
@@ -41,11 +41,6 @@ export interface IntegerLiteral extends Expression {
     value: number
 }
 
-export interface FloatLiteral extends Expression {
-    kind: "FloatLiteral"
-    value: number
-}
-
 export interface Sets extends Statement {
     kind: "Sets"
     body: SetSingle[]
@@ -53,13 +48,17 @@ export interface Sets extends Statement {
 
 export interface SetSingle extends Statement {
     kind: "SetSingle"
-    action: Token
-    body: FloatLiteral[]
-    additional: Token
+    body: Identifier[] | IntegerLiteral[]
+}
+
+export interface Summand extends Statement {
+    kind: "Summand",
+    body: IntegerLiteral[]
 }
 
 export interface Operation extends Statement {
     kind: "Operation",
+    tag: Token,
     identifier: Token,
     rhs: Expression
 }
